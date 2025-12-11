@@ -11,7 +11,6 @@ public class FacialExpressionDataEditor : Editor
     private FacialExpressionSystem facialSystem;
     private Dictionary<string, List<string>> blendShapesByMesh;
     private Vector2 scrollPos;
-    private bool showAvailableBlendShapes = false;
     private string searchFilter = "";
     
     void OnEnable()
@@ -26,7 +25,6 @@ public class FacialExpressionDataEditor : Editor
         
         if (facialSystem != null)
         {
-            // Refresh blendshapes if in play mode or if character root is assigned
             if (Application.isPlaying || facialSystem.characterRoot != null)
             {
                 LoadBlendShapesFromSystem();
@@ -38,7 +36,6 @@ public class FacialExpressionDataEditor : Editor
     {
         if (facialSystem == null) return;
         
-        // If not playing, manually scan the character
         if (!Application.isPlaying && facialSystem.characterRoot != null)
         {
             blendShapesByMesh = new Dictionary<string, List<string>>();
@@ -70,7 +67,6 @@ public class FacialExpressionDataEditor : Editor
     {
         serializedObject.Update();
         
-        // Expression info
         EditorGUILayout.LabelField("Expression Info", EditorStyles.boldLabel);
         SerializedProperty nameProp = serializedObject.FindProperty("expressionName");
         SerializedProperty transProp = serializedObject.FindProperty("transitionDuration");
@@ -80,11 +76,9 @@ public class FacialExpressionDataEditor : Editor
         
         EditorGUILayout.Space(10);
         
-        // Blendshapes list
         EditorGUILayout.LabelField("Blendshapes", EditorStyles.boldLabel);
         SerializedProperty blendShapesProp = serializedObject.FindProperty("blendShapes");
         
-        // Show current blendshapes
         for (int i = 0; i < blendShapesProp.arraySize; i++)
         {
             EditorGUILayout.BeginHorizontal("box");
@@ -95,7 +89,6 @@ public class FacialExpressionDataEditor : Editor
             
             EditorGUILayout.LabelField((i + 1).ToString(), GUILayout.Width(20));
             
-            // Make blendshape name read-only
             GUI.enabled = false;
             EditorGUILayout.PropertyField(nameField, GUIContent.none, GUILayout.Width(120));
             GUI.enabled = true;
@@ -114,7 +107,6 @@ public class FacialExpressionDataEditor : Editor
         
         EditorGUILayout.Space();
         
-        // Add blendshape browser
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Add Blendshapes", EditorStyles.boldLabel);
         
@@ -147,7 +139,6 @@ public class FacialExpressionDataEditor : Editor
             {
                 EditorGUILayout.HelpBox($"Click on any blendshape below to add it to this expression.", MessageType.Info);
                 
-                // Search filter
                 searchFilter = EditorGUILayout.TextField("Search:", searchFilter);
                 
                 EditorGUILayout.Space();
@@ -156,7 +147,6 @@ public class FacialExpressionDataEditor : Editor
                 
                 foreach (var mesh in blendShapesByMesh)
                 {
-                    // Skip meshes with no blendshapes
                     if (mesh.Value == null || mesh.Value.Count == 0)
                         continue;
                     
@@ -164,7 +154,6 @@ public class FacialExpressionDataEditor : Editor
                     
                     foreach (var shapeName in mesh.Value)
                     {
-                        // Filter by search
                         if (!string.IsNullOrEmpty(searchFilter) && 
                             !shapeName.ToLower().Contains(searchFilter.ToLower()))
                         {
@@ -174,7 +163,6 @@ public class FacialExpressionDataEditor : Editor
                         EditorGUILayout.BeginHorizontal();
                         EditorGUILayout.LabelField($"  • {shapeName}");
                         
-                        // Check if blendshape is already added
                         bool alreadyAdded = expressionData.blendShapes.Any(bs => bs.blendShapeName == shapeName);
                         
                         GUI.enabled = !alreadyAdded;
@@ -213,7 +201,6 @@ public class FacialExpressionDataEditor : Editor
     
     private void AddBlendShape(string shapeName)
     {
-        // Check if already exists
         foreach (var bs in expressionData.blendShapes)
         {
             if (bs.blendShapeName == shapeName)
@@ -224,12 +211,9 @@ public class FacialExpressionDataEditor : Editor
             }
         }
         
-        // Add new blendshape
         Undo.RecordObject(expressionData, "Add Blendshape");
         expressionData.blendShapes.Add(new BlendShapeEntry(shapeName, 50f));
         EditorUtility.SetDirty(expressionData);
-        
-        Debug.Log($"Added blendshape: {shapeName}");
     }
 }
 #endif

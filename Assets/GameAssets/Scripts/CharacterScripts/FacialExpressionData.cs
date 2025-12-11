@@ -1,10 +1,5 @@
 using System.Collections.Generic;
 using UnityEngine;
-
-/// <summary>
-/// Type-safe facial expression using enum-based blendshapes
-/// No string typing = no errors!
-/// </summary>
 [CreateAssetMenu(fileName = "New Expression", menuName = "Facial System/Expression", order = 1)]
 public class FacialExpressionData : ScriptableObject
 {
@@ -13,10 +8,6 @@ public class FacialExpressionData : ScriptableObject
     
     [Range(0f, 1f)]
     public float transitionDuration = 0.3f;
-    
-    /// <summary>
-    /// Create a copy with modified intensity
-    /// </summary>
     public FacialExpressionData CreateVariant(float intensityMultiplier)
     {
         var variant = CreateInstance<FacialExpressionData>();
@@ -34,10 +25,6 @@ public class FacialExpressionData : ScriptableObject
         
         return variant;
     }
-    
-    /// <summary>
-    /// Get all blendshape names used in this expression
-    /// </summary>
     public List<string> GetBlendShapeNames()
     {
         List<string> names = new List<string>();
@@ -47,10 +34,6 @@ public class FacialExpressionData : ScriptableObject
         }
         return names;
     }
-    
-    /// <summary>
-    /// Validate that all blendshapes exist in the mesh
-    /// </summary>
     public List<string> ValidateBlendShapes(SkinnedMeshRenderer renderer)
     {
         List<string> missing = new List<string>();

@@ -2,21 +2,15 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-
-/// <summary>
-/// Custom property drawer for LipSyncBlendShape to show blend shape dropdown
-/// </summary>
 [CustomPropertyDrawer(typeof(LipSyncData.LipSyncBlendShape))]
 public class LipSyncBlendShapeDrawer : PropertyDrawer
 {
     private static List<string> cachedBlendShapes = new List<string>();
-    private static bool blendShapesScanned = false;
     
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
     {
         EditorGUI.BeginProperty(position, label, property);
         
-        // Draw foldout
         property.isExpanded = EditorGUI.Foldout(new Rect(position.x, position.y, position.width, EditorGUIUtility.singleLineHeight), 
             property.isExpanded, label, true);
         
@@ -27,7 +21,6 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             float yOffset = position.y + EditorGUIUtility.singleLineHeight + 2;
             float lineHeight = EditorGUIUtility.singleLineHeight + 2;
             
-            // Get properties
             SerializedProperty blendShapeNameProp = property.FindPropertyRelative("blendShapeName");
             SerializedProperty isStaticProp = property.FindPropertyRelative("isStatic");
             SerializedProperty staticValueProp = property.FindPropertyRelative("staticValue");
@@ -36,7 +29,6 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             SerializedProperty changeIntervalProp = property.FindPropertyRelative("changeInterval");
             SerializedProperty easeTypeProp = property.FindPropertyRelative("easeType");
             
-            // Scan for blend shapes button
             Rect scanButtonRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
             if (GUI.Button(scanButtonRect, "🔍 Scan Scene for Blend Shapes"))
             {
@@ -44,7 +36,6 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             }
             yOffset += lineHeight;
             
-            // Blend Shape Name Dropdown
             Rect blendShapeRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
             if (cachedBlendShapes.Count > 0)
             {
@@ -63,46 +54,38 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             }
             yOffset += lineHeight;
             
-            // Is Static
             Rect isStaticRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
             EditorGUI.PropertyField(isStaticRect, isStaticProp);
             yOffset += lineHeight;
             
             if (isStaticProp.boolValue)
             {
-                // Static Value
                 Rect staticValueRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.Slider(staticValueRect, staticValueProp, 0f, 100f, new GUIContent("Static Value"));
                 yOffset += lineHeight;
             }
             else
             {
-                // Animated Range Header
                 Rect headerRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.LabelField(headerRect, "Animated Range", EditorStyles.boldLabel);
                 yOffset += lineHeight;
                 
-                // Min Value
                 Rect minValueRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.Slider(minValueRect, minValueProp, 0f, 100f, new GUIContent("Min Value"));
                 yOffset += lineHeight;
                 
-                // Max Value
                 Rect maxValueRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.Slider(maxValueRect, maxValueProp, 0f, 100f, new GUIContent("Max Value"));
                 yOffset += lineHeight;
                 
-                // Animation Settings Header
                 Rect animHeaderRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.LabelField(animHeaderRect, "Animation Settings", EditorStyles.boldLabel);
                 yOffset += lineHeight;
                 
-                // Change Interval
                 Rect intervalRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.Slider(intervalRect, changeIntervalProp, 0.1f, 2f, new GUIContent("Change Interval"));
                 yOffset += lineHeight;
                 
-                // Ease Type
                 Rect easeRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.PropertyField(easeRect, easeTypeProp);
                 yOffset += lineHeight;
@@ -124,23 +107,23 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
         SerializedProperty isStaticProp = property.FindPropertyRelative("isStatic");
         float lineHeight = EditorGUIUtility.singleLineHeight + 2;
         
-        float height = lineHeight; // Foldout
-        height += lineHeight; // Scan button
-        height += lineHeight; // Blend Shape Name
-        height += lineHeight; // Is Static
+        float height = lineHeight;
+        height += lineHeight;
+        height += lineHeight;
+        height += lineHeight;
         
         if (isStaticProp.boolValue)
         {
-            height += lineHeight; // Static Value
+            height += lineHeight;
         }
         else
         {
-            height += lineHeight; // Header
-            height += lineHeight; // Min Value
-            height += lineHeight; // Max Value
-            height += lineHeight; // Animation Header
-            height += lineHeight; // Change Interval
-            height += lineHeight; // Ease Type
+            height += lineHeight;
+            height += lineHeight;
+            height += lineHeight;
+            height += lineHeight;
+            height += lineHeight;
+            height += lineHeight;
         }
         
         return height;
@@ -151,7 +134,6 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
         cachedBlendShapes.Clear();
         HashSet<string> uniqueBlendShapes = new HashSet<string>();
         
-        // Find all SkinnedMeshRenderer components in scene
         SkinnedMeshRenderer[] renderers = GameObject.FindObjectsOfType<SkinnedMeshRenderer>();
         
         foreach (var renderer in renderers)
@@ -166,10 +148,6 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             }
         }
         
-        // Sort and add to list
         cachedBlendShapes = uniqueBlendShapes.OrderBy(x => x).ToList();
-        blendShapesScanned = true;
-        
-        Debug.Log($"Found {cachedBlendShapes.Count} unique blend shapes across {renderers.Length} SkinnedMeshRenderers");
     }
 }

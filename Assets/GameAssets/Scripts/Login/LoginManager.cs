@@ -13,10 +13,9 @@ public class LoginManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI statusText;
     
     [Header("Scene Settings")]
-    [SerializeField] private string nextSceneName = "2.GameScene";
+    [SerializeField] private int nextSceneToload = 1;
     
     [Header("Login Settings")]
-    [Tooltip("Enable to allow login, disable to simulate invalid login")]
     [SerializeField] private bool allowLogin = true;
     
     [Header("Animation Settings")]
@@ -24,7 +23,6 @@ public class LoginManager : MonoBehaviour
     [SerializeField] private float shakeStrength = 30f;
     [SerializeField] private int shakeVibrato = 10;
     
-    // Events
     public event Action OnLoginSuccess;
     public event Action OnLoginFailed;
     
@@ -54,17 +52,14 @@ public class LoginManager : MonoBehaviour
     {
         isLoggingIn = true;
         
-        // Simulate login delay
         yield return new WaitForSeconds(0.5f);
         
         if (allowLogin)
         {
-            // Success
             ShowLoginSuccess();
         }
         else
         {
-            // Failure
             ShowLoginFailed();
         }
         
@@ -78,18 +73,15 @@ public class LoginManager : MonoBehaviour
             statusText.text = "Login Success!";
             statusText.color = Color.green;
             
-            // Scale animation
             statusText.transform.localScale = Vector3.zero;
             statusText.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
             
-            // Fade in
             statusText.alpha = 0f;
             statusText.DOFade(1f, 0.3f);
         }
         
         OnLoginSuccess?.Invoke();
         
-        // Load next scene
         StartCoroutine(LoadNextScene());
     }
     
@@ -100,15 +92,12 @@ public class LoginManager : MonoBehaviour
             statusText.text = "Invalid Login";
             statusText.color = Color.red;
             
-            // Reset transform
             statusText.transform.localScale = Vector3.one;
             statusText.alpha = 1f;
             
-            // Shake animation
             statusText.transform.DOShakePosition(shakeDuration, shakeStrength, shakeVibrato, 90f, false, true)
                 .SetEase(Ease.OutQuad);
             
-            // Pulse scale
             statusText.transform.DOPunchScale(Vector3.one * 0.2f, shakeDuration, 5, 0.5f);
         }
         
@@ -118,11 +107,7 @@ public class LoginManager : MonoBehaviour
     private IEnumerator LoadNextScene()
     {
         yield return new WaitForSeconds(1.5f);
-        
-        if (!string.IsNullOrEmpty(nextSceneName))
-        {
-            SceneManager.LoadScene(nextSceneName);
-        }
+        SceneManager.LoadScene(nextSceneToload);
     }
     
     private void OnDestroy()
@@ -132,7 +117,6 @@ public class LoginManager : MonoBehaviour
             loginButton.onClick.RemoveListener(OnLoginButtonClicked);
         }
         
-        // Kill any active tweens
         if (statusText != null)
         {
             statusText.transform.DOKill();

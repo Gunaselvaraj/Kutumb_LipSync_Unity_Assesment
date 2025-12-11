@@ -7,10 +7,8 @@ using System.Collections.Generic;
 public class FacialExpressionEditor : Editor
 {
     private FacialExpressionSystem facialSystem;
-    private string newExpressionName = "New Expression";
     private Vector2 scrollPos;
     private bool showBlendShapesList = false;
-    private bool showCreateAsset = false;
     
     void OnEnable()
     {
@@ -23,28 +21,7 @@ public class FacialExpressionEditor : Editor
         
         EditorGUILayout.Space(10);
         EditorGUILayout.LabelField("Expression Editor", EditorStyles.boldLabel);
-        EditorGUILayout.HelpBox("Expressions are now ScriptableObjects. Create them as assets for easy reuse across characters.", MessageType.Info);
         
-        EditorGUILayout.Space();
-        
-        // Create new expression ScriptableObject
-        showCreateAsset = EditorGUILayout.Foldout(showCreateAsset, "Create Expression Asset");
-        if (showCreateAsset)
-        {
-            EditorGUILayout.BeginVertical("box");
-            EditorGUILayout.LabelField("Create ScriptableObject Expression", EditorStyles.boldLabel);
-            EditorGUILayout.HelpBox("Right-click in Project window → Create → Facial System → Facial Expression", MessageType.Info);
-            
-            if (GUILayout.Button("Create Expression Asset", GUILayout.Height(30)))
-            {
-                CreateExpressionAsset();
-            }
-            EditorGUILayout.EndVertical();
-        }
-        
-        EditorGUILayout.Space();
-        
-        // Show available blend shapes
         if (facialSystem.characterRoot != null)
         {
             showBlendShapesList = EditorGUILayout.Foldout(showBlendShapesList, "Available Blend Shapes");
@@ -96,7 +73,6 @@ public class FacialExpressionEditor : Editor
         
         EditorGUILayout.Space();
         
-        // Test expressions
         EditorGUILayout.BeginVertical("box");
         EditorGUILayout.LabelField("Test Expressions", EditorStyles.boldLabel);
         
@@ -120,7 +96,7 @@ public class FacialExpressionEditor : Editor
         }
         else
         {
-            EditorGUILayout.HelpBox("Enter Play Mode to test expressions", MessageType.Info);
+            EditorGUILayout.HelpBox("Enter Play Mode", MessageType.Info);
         }
         
         EditorGUILayout.EndVertical();
@@ -128,30 +104,6 @@ public class FacialExpressionEditor : Editor
         if (GUI.changed)
         {
             EditorUtility.SetDirty(target);
-        }
-    }
-    
-    private void CreateExpressionAsset()
-    {
-        FacialExpressionData newExpression = ScriptableObject.CreateInstance<FacialExpressionData>();
-        newExpression.expressionName = "New Expression";
-        
-        string path = EditorUtility.SaveFilePanelInProject(
-            "Save Facial Expression",
-            "NewExpression",
-            "asset",
-            "Create a new facial expression asset"
-        );
-        
-        if (!string.IsNullOrEmpty(path))
-        {
-            AssetDatabase.CreateAsset(newExpression, path);
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
-            EditorUtility.FocusProjectWindow();
-            Selection.activeObject = newExpression;
-            
-            Debug.Log($"Created expression asset at: {path}");
         }
     }
 }

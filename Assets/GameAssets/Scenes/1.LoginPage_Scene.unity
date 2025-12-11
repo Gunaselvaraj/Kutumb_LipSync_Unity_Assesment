@@ -694,7 +694,7 @@ MonoBehaviour:
   loginButton: {fileID: 1488937515}
   statusText: {fileID: 117603417}
   nextSceneName: 2.GameScene
-  allowLogin: 0
+  allowLogin: 1
   shakeDuration: 0.5
   shakeStrength: 30
   shakeVibrato: 10

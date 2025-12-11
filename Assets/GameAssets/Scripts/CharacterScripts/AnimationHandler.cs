@@ -1,12 +1,10 @@
 using System.Collections;
 using UnityEngine;
-
-/// <summary>
-/// Animation Handler using type-safe facial expression system
-/// No more string-based blendshape errors!
-/// </summary>
 public class AnimationHandler : MonoBehaviour
 {
+    [Header("Button")]
+    public GameObject PlayButton;
+
     [Header("Animation Settings")]
     public Animator animator;
     
@@ -30,11 +28,6 @@ public class AnimationHandler : MonoBehaviour
     
     void Start()
     {
-        if (animator == null)
-        {
-            Debug.LogError("Animator is not assigned!");
-        }
-        
         if (facialSystem == null)
         {
             facialSystem = GetComponent<FacialExpressionSystem>();
@@ -45,34 +38,19 @@ public class AnimationHandler : MonoBehaviour
             simpleLipSync = GetComponent<SimpleLipSync>();
         }
         
-        InitializeFacialExpressions();
+        StartCoroutine(StartTalk());
     }
     
-    private void InitializeFacialExpressions()
-    {
-        if (facialSystem == null) return;
-        
-        // Expressions are now created as ScriptableObject assets
-        // Use the Unity Editor to create expressions: Right-click -> Create -> Facial System -> Expression
-        
-        Debug.Log("Facial expression system initialized");
-    }
 
     public void PlayIdle()
     {
         if (animator != null)
         {
             animator.SetTrigger("Idle");
+            PlayButton.SetActive(true);
         }
-        
-        Debug.Log("Idle animation triggered from button");
     }
     
-    // ===== UI BUTTON METHODS =====
-    
-    /// <summary>
-    /// Play Happy animation and facial expression
-    /// </summary>
     public void PlayHappy()
     {
         if (animator != null)
@@ -84,54 +62,27 @@ public class AnimationHandler : MonoBehaviour
         {
             facialSystem.SetExpression(Happy);
         }
-        
-        Debug.Log("Happy animation triggered from button");
     }
-    
-    /// <summary>
-    /// Start Talk animation with lip-sync
-    /// </summary>
-    public void StartTalk()
+    public IEnumerator StartTalk()
     {
-        if (animator == null) return;
-        
+        yield return new WaitForSeconds(delayBeforeAudio);
+
+        if (animator == null) yield break;
         animator.SetTrigger("Talk");
         
-        // Use SimpleLipSync if available
         if (simpleLipSync != null && talkAudioClip != null)
         {
             simpleLipSync.StartLipSync(talkAudioClip);
-            Debug.Log("Talk started with simple lip-sync from button");
         }
         else if (facialSystem != null)
         {
-            // Fallback: Reset to neutral if no lip-sync
             facialSystem.ResetAllBlendShapes(0.3f);
-            Debug.Log("Talk started without lip-sync (no audio/system)");
         }
     }
-    
-    /// <summary>
-    /// Stop Talk animation and lip-sync
-    /// </summary>
-    public void StopTalk()
-    {
-        if (simpleLipSync != null)
-        {
-            simpleLipSync.StopLipSync();
-        }
-        
-        Debug.Log("Talk stopped");
-    }
-    
-    /// <summary>
-    /// Play full reaction sequence: Sad → Talk → Happy
-    /// </summary>
     public void PlayReactionSequence()
     {
         if (isPlayingSequence)
         {
-            Debug.LogWarning("Sequence already playing");
             return;
         }
         
@@ -148,9 +99,8 @@ public class AnimationHandler : MonoBehaviour
         isPlayingSequence = true;
         
         ResetAllAnimations();
-        
+        PlayButton.SetActive(false);
         // Step 1: Sad
-        Debug.Log("Playing Sad expression and animation");
         if (facialSystem != null && Sad != null)
         {
             facialSystem.SetExpression(Sad);
@@ -159,7 +109,6 @@ public class AnimationHandler : MonoBehaviour
         yield return new WaitForSeconds(sadAnimationDuration);
         
         // Step 2: Happy
-        Debug.Log("Playing Happy expression and animation");
         if (facialSystem != null && Happy != null)
         {
             facialSystem.ResetAllBlendShapes(ResetExpressionDuration);
@@ -170,50 +119,41 @@ public class AnimationHandler : MonoBehaviour
         yield return new WaitForSeconds(happyAnimationDuration);
         
         // Step 3: Sad again - Force reset first to ensure clean transition
-        Debug.Log("Playing Sad expression and animation (second time)");
         if (facialSystem != null && Sad != null)
         {
-            // Reset to neutral first
             facialSystem.ResetAllBlendShapes(ResetExpressionDuration);
             yield return new WaitForSeconds(ResetExpressionDuration);
             
-            // Now apply Sad again
             facialSystem.SetExpression(Sad);
         }
         TriggerAnimation("Sad", true);
         yield return new WaitForSeconds(sadAnimationDuration);
         
-        // Step 4: Idle (neutral - all blendshapes = 0 with transition)
-        Debug.Log("Returning to Idle");
         if (facialSystem != null && Sad != null)
         {
             facialSystem.ResetAllBlendShapes(Sad.transitionDuration);
             yield return new WaitForSeconds(Sad.transitionDuration);
         }
-        
+        PlayButton.SetActive(true);
         isPlayingSequence = false;
-        Debug.Log("Reaction sequence completed");
     }
     
     private void TriggerAnimation(string animationName, bool isActive)
     {
         if (animator == null)
         {
-            Debug.LogWarning($"Animator is null, cannot trigger animation: {animationName}");
             return;
         }
         
         if (isActive)
         {
             animator.SetTrigger(animationName);
-            Debug.Log($"Animation trigger '{animationName}' activated");
         }
     }
     
     private void ResetAllAnimations()
     {
         if (animator == null) return;
-        Debug.Log("All animations reset");
     }
     
 
@@ -230,11 +170,9 @@ public class AnimationHandler : MonoBehaviour
         
         if (facialSystem != null)
         {
-            // Reset to neutral (all blendshapes = 0 with transition)
             facialSystem.ResetAllBlendShapes(0.3f);
         }
         
         isPlayingSequence = false;
-        Debug.Log("Sequence stopped");
     }
 }

@@ -2,10 +2,6 @@ using UnityEngine;
 using UnityEditor;
 using System.Collections.Generic;
 using System.Linq;
-
-/// <summary>
-/// Custom editor for LipSyncData matching FacialExpressionData layout
-/// </summary>
 [CustomEditor(typeof(LipSyncData))]
 public class LipSyncDataEditor : Editor
 {
@@ -19,14 +15,12 @@ public class LipSyncDataEditor : Editor
     
     private List<BlendShapeInfo> availableBlendShapes = new List<BlendShapeInfo>();
     private SerializedProperty blendShapesProp;
-    private SerializedProperty descriptionProp;
     private Vector2 scrollPosition;
     private string searchText = "";
     
     private void OnEnable()
     {
         blendShapesProp = serializedObject.FindProperty("blendShapes");
-        descriptionProp = serializedObject.FindProperty("description");
         ScanForBlendShapes();
     }
     
@@ -34,20 +28,11 @@ public class LipSyncDataEditor : Editor
     {
         serializedObject.Update();
         
-        // Info section (like "Expression Info")
         EditorGUILayout.LabelField("LipSync Info", EditorStyles.boldLabel);
-        
-        EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("Description", GUILayout.Width(150));
-        descriptionProp.stringValue = EditorGUILayout.TextField(descriptionProp.stringValue);
-        EditorGUILayout.EndHorizontal();
-        
         EditorGUILayout.Space(10);
         
-        // Blendshapes section
         EditorGUILayout.LabelField("Blendshapes", EditorStyles.boldLabel);
         
-        // Draw existing blend shapes
         for (int i = 0; i < blendShapesProp.arraySize; i++)
         {
             SerializedProperty element = blendShapesProp.GetArrayElementAtIndex(i);
@@ -61,10 +46,8 @@ public class LipSyncDataEditor : Editor
             
             EditorGUILayout.BeginHorizontal();
             
-            // Index
             EditorGUILayout.LabelField((i + 1).ToString(), GUILayout.Width(20));
             
-            // Blend shape name with mesh name if available
             SerializedProperty meshNameProp = element.FindPropertyRelative("meshName");
             string displayName = string.IsNullOrEmpty(meshNameProp.stringValue) 
                 ? nameProp.stringValue 
@@ -74,24 +57,20 @@ public class LipSyncDataEditor : Editor
             
             if (isStaticProp.boolValue)
             {
-                // Static value
                 staticValueProp.floatValue = EditorGUILayout.FloatField(staticValueProp.floatValue, GUILayout.Width(60));
                 EditorGUILayout.LabelField("(Static)", GUILayout.Width(60));
             }
             else
             {
-                // Show range
                 EditorGUILayout.LabelField($"{minValueProp.floatValue:F0}-{maxValueProp.floatValue:F0}", GUILayout.Width(60));
                 EditorGUILayout.LabelField("(Anim)", GUILayout.Width(60));
             }
             
-            // Settings button
-            if (GUILayout.Button("⚙", GUILayout.Width(30)))
+            if (GUILayout.Button("Settings", GUILayout.Width(70)))
             {
                 ShowBlendShapeSettings(element, i);
             }
             
-            // Remove button
             if (GUILayout.Button("X", GUILayout.Width(30)))
             {
                 blendShapesProp.DeleteArrayElementAtIndex(i);
@@ -104,7 +83,6 @@ public class LipSyncDataEditor : Editor
         
         EditorGUILayout.Space(10);
         
-        // Add Blendshapes section (matching FacialExpressionData layout)
         EditorGUILayout.LabelField("Add Blendshapes", EditorStyles.boldLabel);
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
@@ -114,7 +92,6 @@ public class LipSyncDataEditor : Editor
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.EndVertical();
         
-        // Search box
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Search:", GUILayout.Width(50));
         searchText = EditorGUILayout.TextField(searchText);
@@ -122,12 +99,10 @@ public class LipSyncDataEditor : Editor
         
         EditorGUILayout.Space(5);
         
-        // Blend shapes list with scroll
         scrollPosition = EditorGUILayout.BeginScrollView(scrollPosition, GUILayout.Height(300));
         
         if (availableBlendShapes.Count > 0)
         {
-            // Group by category
             var grouped = availableBlendShapes
                 .Where(bs => string.IsNullOrEmpty(searchText) || 
                             bs.name.ToLower().Contains(searchText.ToLower()) ||
@@ -143,7 +118,6 @@ public class LipSyncDataEditor : Editor
                 {
                     EditorGUILayout.BeginHorizontal();
                     
-                    // Show blend shape name with mesh name in gray
                     EditorGUILayout.LabelField("  • " + info.name, GUILayout.Width(150));
                     
                     GUIStyle grayStyle = new GUIStyle(EditorStyles.label);
@@ -172,7 +146,6 @@ public class LipSyncDataEditor : Editor
         
         EditorGUILayout.Space(10);
         
-        // Refresh button (like "Refresh Blendshapes")
         if (GUILayout.Button("Refresh Blendshapes", GUILayout.Height(30)))
         {
             ScanForBlendShapes();
@@ -185,7 +158,6 @@ public class LipSyncDataEditor : Editor
     {
         availableBlendShapes.Clear();
         
-        // Find all SkinnedMeshRenderer components in scene
         SkinnedMeshRenderer[] renderers = GameObject.FindObjectsOfType<SkinnedMeshRenderer>();
         
         foreach (var renderer in renderers)
@@ -208,18 +180,11 @@ public class LipSyncDataEditor : Editor
             }
         }
         
-        // Sort by name, then by mesh
         availableBlendShapes = availableBlendShapes.OrderBy(x => x.name).ThenBy(x => x.meshName).ToList();
-        
-        if (availableBlendShapes.Count > 0)
-        {
-            Debug.Log($"Found {availableBlendShapes.Count} blend shapes across {renderers.Length} meshes");
-        }
     }
     
     private string GetMeshCategory(BlendShapeInfo info)
     {
-        // Try to categorize based on mesh name first, then blend shape name
         string meshLower = info.meshName.ToLower();
         string nameLower = info.name.ToLower();
         
@@ -231,7 +196,6 @@ public class LipSyncDataEditor : Editor
         if (nameLower.Contains("nose")) return "Nose";
         if (nameLower.Contains("cheek")) return "Cheek";
         
-        // Use mesh name as category
         return info.meshName;
     }
     
@@ -243,7 +207,6 @@ public class LipSyncDataEditor : Editor
             SerializedProperty nameProp = element.FindPropertyRelative("blendShapeName");
             SerializedProperty meshNameProp = element.FindPropertyRelative("meshName");
             
-            // Check both name and mesh match
             if (nameProp.stringValue == info.name && 
                 (string.IsNullOrEmpty(meshNameProp.stringValue) || meshNameProp.stringValue == info.meshName))
                 return true;
@@ -261,7 +224,6 @@ public class LipSyncDataEditor : Editor
     
     private void AddBlendShape(string blendShapeName, string meshName, bool isStatic)
     {
-        // Add new element
         blendShapesProp.InsertArrayElementAtIndex(blendShapesProp.arraySize);
         SerializedProperty newElement = blendShapesProp.GetArrayElementAtIndex(blendShapesProp.arraySize - 1);
         
@@ -282,10 +244,6 @@ public class LipSyncDataEditor : Editor
         BlendShapeSettingsWindow.ShowWindow(element, serializedObject, index);
     }
 }
-
-/// <summary>
-/// Popup window for editing blend shape settings
-/// </summary>
 public class BlendShapeSettingsWindow : EditorWindow
 {
     private SerializedProperty element;
@@ -325,7 +283,6 @@ public class BlendShapeSettingsWindow : EditorWindow
         SerializedProperty changeIntervalProp = element.FindPropertyRelative("changeInterval");
         SerializedProperty easeTypeProp = element.FindPropertyRelative("easeType");
         
-        // Blend shape name (read-only) with mesh info
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Blend Shape:", GUILayout.Width(120));
         string displayName = string.IsNullOrEmpty(meshNameProp.stringValue)
@@ -336,7 +293,6 @@ public class BlendShapeSettingsWindow : EditorWindow
         
         EditorGUILayout.Space(10);
         
-        // Animation Type
         EditorGUILayout.LabelField("Animation Type", EditorStyles.boldLabel);
         isStaticProp.boolValue = EditorGUILayout.Toggle("Is Static", isStaticProp.boolValue);
         
@@ -344,13 +300,11 @@ public class BlendShapeSettingsWindow : EditorWindow
         
         if (isStaticProp.boolValue)
         {
-            // Static mode
             EditorGUILayout.HelpBox("Static: Blend shape stays at a fixed value", MessageType.Info);
             staticValueProp.floatValue = EditorGUILayout.Slider("Value", staticValueProp.floatValue, 0f, 100f);
         }
         else
         {
-            // Animated mode
             EditorGUILayout.HelpBox("Animated: Blend shape randomly oscillates between min and max values", MessageType.Info);
             
             EditorGUILayout.LabelField("Value Range", EditorStyles.boldLabel);
