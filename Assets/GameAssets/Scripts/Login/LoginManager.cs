@@ -1,313 +1,142 @@
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using TMPro;
-#if UNITY_IOS
-using UnityEngine.SignInWithApple;
-#endif
+using DG.Tweening;
 
 public class LoginManager : MonoBehaviour
 {
     [Header("UI References")]
-    [SerializeField] private Button appleSignInButton;
+    [SerializeField] private Button loginButton;
     [SerializeField] private TextMeshProUGUI statusText;
     
     [Header("Scene Settings")]
-    [SerializeField] private string humanoidSceneName = "2.GameScene";
+    [SerializeField] private string nextSceneName = "2.GameScene";
     
     [Header("Login Settings")]
-    [SerializeField] private bool enableFallbackCredentials = true; // For editor testing
+    [Tooltip("Enable to allow login, disable to simulate invalid login")]
+    [SerializeField] private bool allowLogin = true;
+    
+    [Header("Animation Settings")]
+    [SerializeField] private float shakeDuration = 0.5f;
+    [SerializeField] private float shakeStrength = 30f;
+    [SerializeField] private int shakeVibrato = 10;
     
     // Events
-    public event Action<string, string> OnLoginSuccess; // userId, email
-    public event Action<string> OnLoginFailed;
+    public event Action OnLoginSuccess;
+    public event Action OnLoginFailed;
     
-    // Apple ID authentication state
-    private string currentUserId;
-    private string currentUserEmail;
-    private bool isAuthenticating = false;
+    private bool isLoggingIn = false;
     
     private void Start()
     {
-        // Setup Apple Sign In button listener
-        if (appleSignInButton != null)
+        if (loginButton != null)
         {
-            appleSignInButton.onClick.AddListener(OnAppleSignInButtonClicked);
+            loginButton.onClick.AddListener(OnLoginButtonClicked);
         }
         
-        // Clear status text
-        UpdateStatusText("");
-        
-        // Check if user is already logged in
-        CheckExistingCredentials();
-    }
-    
-    private void CheckExistingCredentials()
-    {
-        // Check for saved Apple ID credentials
-        string savedUserId = PlayerPrefs.GetString("AppleUserId", "");
-        
-        if (!string.IsNullOrEmpty(savedUserId))
+        if (statusText != null)
         {
-            Debug.Log("Found existing Apple ID credentials");
-            UpdateStatusText("Found existing login session");
-            
-#if UNITY_IOS
-            // Verify credential state on iOS
-            StartCoroutine(CheckCredentialState(savedUserId));
-#else
-            // For testing in editor
-            if (enableFallbackCredentials)
-            {
-                AutoLoginWithSavedCredentials(savedUserId);
-            }
-#endif
+            statusText.text = "";
         }
     }
     
-#if UNITY_IOS
-    private IEnumerator CheckCredentialState(string userId)
+    public void OnLoginButtonClicked()
     {
-        var request = new SignInWithApple.GetCredentialStateRequest();
-        request.userID = userId;
+        if (isLoggingIn) return;
         
-        yield return request.GetCredentialState((state) =>
-        {
-            switch (state)
-            {
-                case SignInWithApple.CredentialState.Authorized:
-                    AutoLoginWithSavedCredentials(userId);
-                    break;
-                    
-                case SignInWithApple.CredentialState.Revoked:
-                    Debug.Log("Apple ID credentials revoked");
-                    ClearSavedCredentials();
-                    break;
-                    
-                case SignInWithApple.CredentialState.NotFound:
-                    Debug.Log("Apple ID credentials not found");
-                    ClearSavedCredentials();
-                    break;
-            }
-        });
-    }
-#endif
-    
-    public void OnAppleSignInButtonClicked()
-    {
-        if (isAuthenticating)
-        {
-            Debug.LogWarning("Authentication already in progress");
-            return;
-        }
-        
-        StartCoroutine(SignInWithApple());
+        StartCoroutine(LoginCoroutine());
     }
     
-    private IEnumerator SignInWithApple()
+    private IEnumerator LoginCoroutine()
     {
-        isAuthenticating = true;
-        UpdateStatusText("Connecting to Apple ID...");
+        isLoggingIn = true;
         
-#if UNITY_IOS
-        var loginArgs = new SignInWithApple.LoginOptions();
-        loginArgs.RequestedScopes = SignInWithApple.Scope.Email | SignInWithApple.Scope.FullName;
+        // Simulate login delay
+        yield return new WaitForSeconds(0.5f);
         
-        SignInWithApple.Login(loginArgs, (credential) =>
+        if (allowLogin)
         {
-            // Success callback
-            HandleAppleLoginSuccess(credential);
-        },
-        (error) =>
-        {
-            // Error callback
-            HandleAppleLoginError(error);
-        });
-#else
-        // Fallback for testing in Unity Editor
-        yield return new WaitForSeconds(1.5f);
-        
-        if (enableFallbackCredentials)
-        {
-            Debug.LogWarning("Sign in with Apple is only available on iOS. Using test credentials.");
-            SimulateAppleLoginSuccess();
+            // Success
+            ShowLoginSuccess();
         }
         else
         {
-            OnAppleLoginFailure("Invalid login");
-        }
-#endif
-        
-        yield return null;
-    }
-    
-#if UNITY_IOS
-    private void HandleAppleLoginSuccess(SignInWithApple.ICredential credential)
-    {
-        var appleIdCredential = credential as SignInWithApple.AppleIDCredential;
-        
-        if (appleIdCredential != null)
-        {
-            currentUserId = appleIdCredential.user;
-            currentUserEmail = appleIdCredential.email ?? PlayerPrefs.GetString("AppleUserEmail", "");
-            
-            // Save credentials
-            PlayerPrefs.SetString("AppleUserId", currentUserId);
-            if (!string.IsNullOrEmpty(currentUserEmail))
-            {
-                PlayerPrefs.SetString("AppleUserEmail", currentUserEmail);
-            }
-            PlayerPrefs.Save();
-            
-            // Get user's name if available
-            string fullName = "";
-            if (appleIdCredential.fullName != null)
-            {
-                fullName = $"{appleIdCredential.fullName.givenName} {appleIdCredential.fullName.familyName}".Trim();
-                if (!string.IsNullOrEmpty(fullName))
-                {
-                    PlayerPrefs.SetString("AppleUserName", fullName);
-                    PlayerPrefs.Save();
-                }
-            }
-            
-            OnAppleLoginSuccessful(currentUserId, currentUserEmail, fullName);
-        }
-        else
-        {
-            HandleAppleLoginError(new SignInWithApple.Error { code = 1001, localizedDescription = "Invalid credential format" });
-        }
-    }
-    
-    private void HandleAppleLoginError(SignInWithApple.Error error)
-    {
-        isAuthenticating = false;
-        
-        string errorMessage = "Invalid login";
-        
-        // Handle specific error codes
-        if (error.code == 1001) // User canceled
-        {
-            errorMessage = "Sign in cancelled by user";
+            // Failure
+            ShowLoginFailed();
         }
         
-        OnAppleLoginFailure(errorMessage);
-    }
-#else
-    private void SimulateAppleLoginSuccess()
-    {
-        // Simulate Apple login for testing in editor
-        currentUserId = "test.apple.user." + System.Guid.NewGuid().ToString();
-        currentUserEmail = "test@example.com";
-        
-        PlayerPrefs.SetString("AppleUserId", currentUserId);
-        PlayerPrefs.SetString("AppleUserEmail", currentUserEmail);
-        PlayerPrefs.SetString("AppleUserName", "Test User");
-        PlayerPrefs.Save();
-        
-        OnAppleLoginSuccessful(currentUserId, currentUserEmail, "Test User");
-    }
-#endif
-    
-    private void AutoLoginWithSavedCredentials(string userId)
-    {
-        currentUserId = userId;
-        currentUserEmail = PlayerPrefs.GetString("AppleUserEmail", "");
-        string userName = PlayerPrefs.GetString("AppleUserName", "");
-        
-        OnAppleLoginSuccessful(currentUserId, currentUserEmail, userName);
+        isLoggingIn = false;
     }
     
-    private void OnAppleLoginSuccessful(string userId, string email, string name)
-    {
-        isAuthenticating = false;
-        
-        string displayName = !string.IsNullOrEmpty(name) ? name : email;
-        if (string.IsNullOrEmpty(displayName))
-        {
-            displayName = "User";
-        }
-        
-        UpdateStatusText($"Login successful! Welcome, {displayName}!");
-        Debug.Log($"Apple ID authentication successful - UserID: {userId}, Email: {email}");
-        
-        // Invoke success event
-        OnLoginSuccess?.Invoke(userId, email);
-        
-        // Load humanoid scene after short delay
-        StartCoroutine(LoadHumanoidScene());
-    }
-    
-    private IEnumerator LoadHumanoidScene()
-    {
-        yield return new WaitForSeconds(1f);
-        
-        Debug.Log($"Loading scene: {humanoidSceneName}");
-        SceneManager.LoadScene(humanoidSceneName);
-    }
-    
-    private void OnAppleLoginFailure(string errorMessage)
-    {
-        isAuthenticating = false;
-        
-        UpdateStatusText(errorMessage);
-        Debug.LogWarning($"Apple ID authentication failed: {errorMessage}");
-        
-        // Invoke failure event
-        OnLoginFailed?.Invoke(errorMessage);
-    }
-    
-    private void UpdateStatusText(string message)
+    private void ShowLoginSuccess()
     {
         if (statusText != null)
         {
-            statusText.text = message;
+            statusText.text = "Login Success!";
+            statusText.color = Color.green;
+            
+            // Scale animation
+            statusText.transform.localScale = Vector3.zero;
+            statusText.transform.DOScale(1f, 0.5f).SetEase(Ease.OutBack);
+            
+            // Fade in
+            statusText.alpha = 0f;
+            statusText.DOFade(1f, 0.3f);
         }
-    }
-    
-    // Public methods for session management
-    public void SignOut()
-    {
-        ClearSavedCredentials();
-        UpdateStatusText("Signed out successfully");
-        Debug.Log("User signed out");
-    }
-    
-    private void ClearSavedCredentials()
-    {
-        PlayerPrefs.DeleteKey("AppleUserId");
-        PlayerPrefs.DeleteKey("AppleUserEmail");
-        PlayerPrefs.DeleteKey("AppleUserName");
-        PlayerPrefs.Save();
         
-        currentUserId = null;
-        currentUserEmail = null;
+        OnLoginSuccess?.Invoke();
+        
+        // Load next scene
+        StartCoroutine(LoadNextScene());
     }
     
-    public bool IsLoggedIn()
+    private void ShowLoginFailed()
     {
-        return !string.IsNullOrEmpty(currentUserId);
+        if (statusText != null)
+        {
+            statusText.text = "Invalid Login";
+            statusText.color = Color.red;
+            
+            // Reset transform
+            statusText.transform.localScale = Vector3.one;
+            statusText.alpha = 1f;
+            
+            // Shake animation
+            statusText.transform.DOShakePosition(shakeDuration, shakeStrength, shakeVibrato, 90f, false, true)
+                .SetEase(Ease.OutQuad);
+            
+            // Pulse scale
+            statusText.transform.DOPunchScale(Vector3.one * 0.2f, shakeDuration, 5, 0.5f);
+        }
+        
+        OnLoginFailed?.Invoke();
     }
     
-    public string GetCurrentUserId()
+    private IEnumerator LoadNextScene()
     {
-        return currentUserId;
-    }
-    
-    public string GetCurrentUserEmail()
-    {
-        return currentUserEmail;
+        yield return new WaitForSeconds(1.5f);
+        
+        if (!string.IsNullOrEmpty(nextSceneName))
+        {
+            SceneManager.LoadScene(nextSceneName);
+        }
     }
     
     private void OnDestroy()
     {
-        // Clean up button listener
-        if (appleSignInButton != null)
+        if (loginButton != null)
         {
-            appleSignInButton.onClick.RemoveListener(OnAppleSignInButtonClicked);
+            loginButton.onClick.RemoveListener(OnLoginButtonClicked);
+        }
+        
+        // Kill any active tweens
+        if (statusText != null)
+        {
+            statusText.transform.DOKill();
+            statusText.DOKill();
         }
     }
 }

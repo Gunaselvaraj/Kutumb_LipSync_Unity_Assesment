@@ -157,7 +157,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: -292}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 738.6864, y: 203.6641}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &117603417
 MonoBehaviour:
@@ -213,8 +213,8 @@ MonoBehaviour:
   m_fontSizeMin: 18
   m_fontSizeMax: 72
   m_fontStyle: 0
-  m_HorizontalAlignment: 1
-  m_VerticalAlignment: 256
+  m_HorizontalAlignment: 2
+  m_VerticalAlignment: 512
   m_textAlignment: 65535
   m_characterSpacing: 0
   m_wordSpacing: 0
@@ -411,7 +411,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &541144940
 RectTransform:
   m_ObjectHideFlags: 0
@@ -691,10 +691,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbdd23df20c16d94b9136a9fdd8f0440, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  appleSignInButton: {fileID: 1488937515}
+  loginButton: {fileID: 1488937515}
   statusText: {fileID: 117603417}
-  humanoidSceneName: 2.GameScene
-  enableFallbackCredentials: 1
+  nextSceneName: 2.GameScene
+  allowLogin: 0
+  shakeDuration: 0.5
+  shakeStrength: 30
+  shakeVibrato: 10
 --- !u!1 &863371796
 GameObject:
   m_ObjectHideFlags: 0
@@ -997,6 +1000,7 @@ GameObject:
   - component: {fileID: 1488937517}
   - component: {fileID: 1488937516}
   - component: {fileID: 1488937515}
+  - component: {fileID: 1488937518}
   m_Layer: 5
   m_Name: LoginButton
   m_TagString: Untagged
@@ -1013,7 +1017,7 @@ RectTransform:
   m_GameObject: {fileID: 1488937513}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 2.5, y: 2.5, z: 2.5}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1767896879}
@@ -1021,7 +1025,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 160}
   m_SizeDelta: {x: 194.3967, y: 76.9045}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1488937515
@@ -1106,6 +1110,23 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1488937513}
   m_CullTransparentMesh: 1
+--- !u!114 &1488937518
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1488937513}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c4fbdca18bb0b804f8e011b74c7c114a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  startsize: 2.5
+  Size_Down: 0.85
+  _Duration: 0.15
+  EaseType_Down: 1
+  EaseType_Up: 1
 --- !u!1 &1581009374
 GameObject:
   m_ObjectHideFlags: 0
@@ -1124,7 +1145,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &1581009375
 RectTransform:
   m_ObjectHideFlags: 0

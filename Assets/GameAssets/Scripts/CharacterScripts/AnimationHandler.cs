@@ -15,6 +15,10 @@ public class AnimationHandler : MonoBehaviour
     public FacialExpressionData Happy,Sad;
     public float ResetExpressionDuration = 2f;
     
+    [Header("Lip Sync System")]
+    public SimpleLipSync simpleLipSync;
+    public AudioClip talkAudioClip;
+    
     [Header("Animation Timing")]
     public float sadAnimationDuration = 2f;
     public float happyAnimationDuration = 2f;
@@ -36,6 +40,11 @@ public class AnimationHandler : MonoBehaviour
             facialSystem = GetComponent<FacialExpressionSystem>();
         }
         
+        if (simpleLipSync == null)
+        {
+            simpleLipSync = GetComponent<SimpleLipSync>();
+        }
+        
         InitializeFacialExpressions();
     }
     
@@ -47,6 +56,16 @@ public class AnimationHandler : MonoBehaviour
         // Use the Unity Editor to create expressions: Right-click -> Create -> Facial System -> Expression
         
         Debug.Log("Facial expression system initialized");
+    }
+
+    public void PlayIdle()
+    {
+        if (animator != null)
+        {
+            animator.SetTrigger("Idle");
+        }
+        
+        Debug.Log("Idle animation triggered from button");
     }
     
     // ===== UI BUTTON METHODS =====
@@ -70,7 +89,7 @@ public class AnimationHandler : MonoBehaviour
     }
     
     /// <summary>
-    /// Start Talk animation
+    /// Start Talk animation with lip-sync
     /// </summary>
     public void StartTalk()
     {
@@ -78,13 +97,31 @@ public class AnimationHandler : MonoBehaviour
         
         animator.SetTrigger("Talk");
         
-        if (facialSystem != null)
+        // Use SimpleLipSync if available
+        if (simpleLipSync != null && talkAudioClip != null)
         {
-            // Reset to neutral (all blendshapes = 0 with transition)
+            simpleLipSync.StartLipSync(talkAudioClip);
+            Debug.Log("Talk started with simple lip-sync from button");
+        }
+        else if (facialSystem != null)
+        {
+            // Fallback: Reset to neutral if no lip-sync
             facialSystem.ResetAllBlendShapes(0.3f);
+            Debug.Log("Talk started without lip-sync (no audio/system)");
+        }
+    }
+    
+    /// <summary>
+    /// Stop Talk animation and lip-sync
+    /// </summary>
+    public void StopTalk()
+    {
+        if (simpleLipSync != null)
+        {
+            simpleLipSync.StopLipSync();
         }
         
-        Debug.Log("Talk started from button");
+        Debug.Log("Talk stopped");
     }
     
     /// <summary>

@@ -30,6 +30,8 @@ public class FacialExpressionSystem : MonoBehaviour
     
     // Maps: blendshape name -> (renderer, blendshape index)
     private Dictionary<string, (SkinnedMeshRenderer renderer, int index)> blendShapeCache = new Dictionary<string, (SkinnedMeshRenderer, int)>();
+    // Maps: (blendshape name, mesh name) -> (renderer, blendshape index) for duplicate names
+    private Dictionary<(string, string), (SkinnedMeshRenderer renderer, int index)> blendShapeCacheWithMesh = new Dictionary<(string, string), (SkinnedMeshRenderer, int)>();
     private Dictionary<string, float> currentBlendShapeValues = new Dictionary<string, float>();
     private Dictionary<string, FacialExpressionData> expressionCache = new Dictionary<string, FacialExpressionData>();
     private FacialExpressionData activeExpression = null;
@@ -112,6 +114,7 @@ public class FacialExpressionSystem : MonoBehaviour
     private void CacheBlendShapeIndices()
     {
         blendShapeCache.Clear();
+        blendShapeCacheWithMesh.Clear();
         
         foreach (var renderer in allSkinnedMeshRenderers)
         {
@@ -124,20 +127,18 @@ public class FacialExpressionSystem : MonoBehaviour
             {
                 string shapeName = mesh.GetBlendShapeName(i);
                 
-                // Store with mesh name prefix to avoid conflicts (e.g., "Body.mouthSmile", "Eye.eyeBlink")
-                string fullName = shapeName;
-                
-                // If duplicate name exists, add mesh name prefix
-                if (blendShapeCache.ContainsKey(shapeName))
+                // Store with just the name (first occurrence only)
+                if (!blendShapeCache.ContainsKey(shapeName))
                 {
-                    fullName = $"{meshName}.{shapeName}";
+                    blendShapeCache[shapeName] = (renderer, i);
                 }
                 
-                blendShapeCache[fullName] = (renderer, i);
+                // Also store with mesh name for specific targeting
+                blendShapeCacheWithMesh[(shapeName, meshName)] = (renderer, i);
             }
         }
         
-        Debug.Log($"Cached {blendShapeCache.Count} blend shapes from {allSkinnedMeshRenderers.Count} meshes");
+        Debug.Log($"Cached {blendShapeCache.Count} unique blend shape names and {blendShapeCacheWithMesh.Count} total blend shapes from {allSkinnedMeshRenderers.Count} meshes");
     }
     
     /// <summary>
@@ -312,6 +313,28 @@ public class FacialExpressionSystem : MonoBehaviour
         {
             renderer.SetBlendShapeWeight(index, weight);
             currentBlendShapeValues[blendShapeName] = weight;
+        }
+    }
+    
+    /// <summary>
+    /// Set a blendshape value on a specific mesh
+    /// </summary>
+    public void SetBlendShapeValue(string blendShapeName, string meshName, float weight)
+    {
+        var key = (blendShapeName, meshName);
+        
+        if (!blendShapeCacheWithMesh.ContainsKey(key))
+        {
+            // Fallback to name-only version
+            SetBlendShapeValue(blendShapeName, weight);
+            return;
+        }
+        
+        var (renderer, index) = blendShapeCacheWithMesh[key];
+        if (renderer != null)
+        {
+            renderer.SetBlendShapeWeight(index, weight);
+            currentBlendShapeValues[$"{meshName}.{blendShapeName}"] = weight;
         }
     }
     
