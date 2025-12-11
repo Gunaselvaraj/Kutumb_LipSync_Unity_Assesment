@@ -6383,6 +6383,8 @@ MonoBehaviour:
   expressions:
   - {fileID: 11400000, guid: 94122dbdcc017bc478b51a33f1534c0d, type: 2}
   - {fileID: 11400000, guid: e0575c3a7bfa53c4e897894996568cd2, type: 2}
+  - {fileID: 11400000, guid: b47f45e535be54343a7c9f760b003017, type: 2}
+  - {fileID: 11400000, guid: b9473e76c4e6cdf4f91fe6a22192c360, type: 2}
   eyeBlinkExpression: {fileID: 11400000, guid: 98f7653cab916444c8ce3adcfd410df5, type: 2}
   blinkInterval: 1
   blinkDuration: 0.1
