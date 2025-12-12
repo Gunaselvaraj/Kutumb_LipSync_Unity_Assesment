@@ -28,6 +28,9 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             SerializedProperty maxValueProp = property.FindPropertyRelative("maxValue");
             SerializedProperty changeIntervalProp = property.FindPropertyRelative("changeInterval");
             SerializedProperty easeTypeProp = property.FindPropertyRelative("easeType");
+            SerializedProperty useDelayedAnimationProp = property.FindPropertyRelative("useDelayedAnimation");
+            SerializedProperty initialValueProp = property.FindPropertyRelative("initialValue");
+            SerializedProperty animationDelayProp = property.FindPropertyRelative("animationDelay");
             
             Rect scanButtonRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
             if (GUI.Button(scanButtonRect, "🔍 Scan Scene for Blend Shapes"))
@@ -89,6 +92,25 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
                 Rect easeRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
                 EditorGUI.PropertyField(easeRect, easeTypeProp);
                 yOffset += lineHeight;
+                
+                Rect delayHeaderRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
+                EditorGUI.LabelField(delayHeaderRect, "Delayed Animation", EditorStyles.boldLabel);
+                yOffset += lineHeight;
+                
+                Rect useDelayedRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
+                EditorGUI.PropertyField(useDelayedRect, useDelayedAnimationProp, new GUIContent("Use Delayed Start"));
+                yOffset += lineHeight;
+                
+                if (useDelayedAnimationProp.boolValue)
+                {
+                    Rect initialValueRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
+                    EditorGUI.Slider(initialValueRect, initialValueProp, 0f, 100f, new GUIContent("Initial Value"));
+                    yOffset += lineHeight;
+                    
+                    Rect delayRect = new Rect(position.x, yOffset, position.width, EditorGUIUtility.singleLineHeight);
+                    EditorGUI.PropertyField(delayRect, animationDelayProp, new GUIContent("Animation Delay (s)"));
+                    yOffset += lineHeight;
+                }
             }
             
             EditorGUI.indentLevel--;
@@ -105,6 +127,7 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
         }
         
         SerializedProperty isStaticProp = property.FindPropertyRelative("isStatic");
+        SerializedProperty useDelayedAnimationProp = property.FindPropertyRelative("useDelayedAnimation");
         float lineHeight = EditorGUIUtility.singleLineHeight + 2;
         
         float height = lineHeight;
@@ -124,6 +147,15 @@ public class LipSyncBlendShapeDrawer : PropertyDrawer
             height += lineHeight;
             height += lineHeight;
             height += lineHeight;
+            
+            height += lineHeight;
+            height += lineHeight;
+            
+            if (useDelayedAnimationProp != null && useDelayedAnimationProp.boolValue)
+            {
+                height += lineHeight;
+                height += lineHeight;
+            }
         }
         
         return height;

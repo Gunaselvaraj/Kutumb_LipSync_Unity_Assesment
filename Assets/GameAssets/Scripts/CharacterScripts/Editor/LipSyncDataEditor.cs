@@ -87,7 +87,6 @@ public class LipSyncDataEditor : Editor
         
         EditorGUILayout.BeginVertical(EditorStyles.helpBox);
         EditorGUILayout.BeginHorizontal();
-        EditorGUILayout.LabelField("⚠", GUILayout.Width(20));
         EditorGUILayout.LabelField("Click on any blendshape below to add it to this data.");
         EditorGUILayout.EndHorizontal();
         EditorGUILayout.EndVertical();
@@ -282,6 +281,9 @@ public class BlendShapeSettingsWindow : EditorWindow
         SerializedProperty maxValueProp = element.FindPropertyRelative("maxValue");
         SerializedProperty changeIntervalProp = element.FindPropertyRelative("changeInterval");
         SerializedProperty easeTypeProp = element.FindPropertyRelative("easeType");
+        SerializedProperty useDelayedAnimationProp = element.FindPropertyRelative("useDelayedAnimation");
+        SerializedProperty initialValueProp = element.FindPropertyRelative("initialValue");
+        SerializedProperty animationDelayProp = element.FindPropertyRelative("animationDelay");
         
         EditorGUILayout.BeginHorizontal();
         EditorGUILayout.LabelField("Blend Shape:", GUILayout.Width(120));
@@ -324,6 +326,18 @@ public class BlendShapeSettingsWindow : EditorWindow
             
             EditorGUILayout.Space(5);
             EditorGUILayout.HelpBox("Recommended for natural talking:\n• InOutSine - Smooth natural motion\n• InOutQuad - Gentle ease\n• Linear - Constant speed", MessageType.None);
+            
+            EditorGUILayout.Space(10);
+            
+            EditorGUILayout.LabelField("Delayed Animation", EditorStyles.boldLabel);
+            useDelayedAnimationProp.boolValue = EditorGUILayout.Toggle("Use Delayed Start", useDelayedAnimationProp.boolValue);
+            
+            if (useDelayedAnimationProp.boolValue)
+            {
+                EditorGUILayout.HelpBox("Starts at initial value, then begins animation after delay", MessageType.Info);
+                initialValueProp.floatValue = EditorGUILayout.Slider("Initial Value", initialValueProp.floatValue, 0f, 100f);
+                animationDelayProp.floatValue = EditorGUILayout.Slider("Animation Delay (s)", animationDelayProp.floatValue, 0f, 5f);
+            }
         }
         
         EditorGUILayout.Space(20);

@@ -28,6 +28,7 @@ public class FacialExpressionSystem : MonoBehaviour
     private HashSet<string> eyeBlinkBlendShapes = new HashSet<string>();
     private Coroutine transitionCoroutine;
     private Coroutine blinkCoroutine;
+    private Coroutine randomExpressionCoroutine;
     
     void Start()
     {
@@ -383,6 +384,73 @@ public class FacialExpressionSystem : MonoBehaviour
     {
         return expressionCache.ContainsKey(name) ? expressionCache[name] : null;
     }
+    
+    public void PlayRandomExpression()
+    {
+        if (expressions.Count == 0) return;
+        
+        var availableExpressions = expressions.Where(e => e != null && e != eyeBlinkExpression && e != activeExpression).ToList();
+        
+        if (availableExpressions.Count == 0) return;
+        
+        int randomIndex = Random.Range(0, availableExpressions.Count);
+        randomExpressionCoroutine = StartCoroutine(PlayRandomExpressionCoroutine(availableExpressions[randomIndex]));
+    }
+    
+    public void StopRandomExpression()
+    {
+        if (randomExpressionCoroutine != null)
+        {
+            StopCoroutine(randomExpressionCoroutine);
+            randomExpressionCoroutine = null;
+            
+            if (activeExpression != null)
+            {
+                foreach (var bs in activeExpression.blendShapes)
+                {
+                    SetBlendShapeValue(bs.blendShapeName, 0f);
+                }
+            }
+        }
+    }
+    
+    private IEnumerator PlayRandomExpressionCoroutine(FacialExpressionData newExpression)
+    {
+        if (activeExpression != null)
+        {
+            float transitionDuration = activeExpression.transitionDuration;
+            float elapsed = 0f;
+            
+            Dictionary<string, float> startValues = new Dictionary<string, float>();
+            foreach (var bs in activeExpression.blendShapes)
+            {
+                startValues[bs.blendShapeName] = GetCurrentBlendShapeValue(bs.blendShapeName);
+            }
+            
+            while (elapsed < transitionDuration)
+            {
+                elapsed += Time.deltaTime;
+                float t = Mathf.Clamp01(elapsed / transitionDuration);
+                
+                foreach (var bs in activeExpression.blendShapes)
+                {
+                    float startValue = startValues.ContainsKey(bs.blendShapeName) ? startValues[bs.blendShapeName] : 0f;
+                    float value = Mathf.Lerp(startValue, 0f, t);
+                    SetBlendShapeValue(bs.blendShapeName, value);
+                }
+                
+                yield return null;
+            }
+            
+            foreach (var bs in activeExpression.blendShapes)
+            {
+                SetBlendShapeValue(bs.blendShapeName, 0f);
+            }
+        }
+        
+        SetExpression(newExpression);
+    }
+    
     private IEnumerator EyeBlinkLoop()
     {
         while (true)

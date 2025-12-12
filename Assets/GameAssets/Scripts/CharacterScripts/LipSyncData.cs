@@ -9,7 +9,6 @@ public class LipSyncData : ScriptableObject
     {
         public string blendShapeName;
         
-        [Tooltip("Name of the mesh this blend shape belongs to (optional, for identification)")]
         public string meshName;
         public bool isStatic = false;
         
@@ -26,9 +25,14 @@ public class LipSyncData : ScriptableObject
         
         [Header("Animation Settings")]
         [Range(0.1f, 2f)]
-        [Tooltip("How often this blend shape changes (seconds)")]
         public float changeInterval = 0.3f;
         public Ease easeType = Ease.InOutSine;
+        
+        [Header("Delayed Animation (if not static)")]
+        public bool useDelayedAnimation = false;
+        [Range(0, 100)]
+        public float initialValue = 100f;
+        public float animationDelay = 0.5f;
         
         [System.NonSerialized]
         public float currentValue;
@@ -36,6 +40,8 @@ public class LipSyncData : ScriptableObject
         public float targetValue;
         [System.NonSerialized]
         public float timer;
+        [System.NonSerialized]
+        public float elapsedTime;
         [System.NonSerialized]
         public Tweener activeTween;
         
@@ -80,18 +86,32 @@ public class LipSyncData : ScriptableObject
                 currentValue = staticValue;
                 targetValue = staticValue;
             }
+            else if (useDelayedAnimation)
+            {
+                currentValue = initialValue;
+                targetValue = initialValue;
+            }
             else
             {
                 currentValue = Random.Range(minValue, maxValue);
                 targetValue = Random.Range(minValue, maxValue);
             }
             timer = 0f;
+            elapsedTime = 0f;
         }
         public void Update(float deltaTime)
         {
             if (isStatic)
             {
                 currentValue = staticValue;
+                return;
+            }
+            
+            elapsedTime += deltaTime;
+            
+            if (useDelayedAnimation && elapsedTime < animationDelay)
+            {
+                currentValue = initialValue;
                 return;
             }
             

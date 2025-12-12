@@ -4,6 +4,7 @@ public class AnimationHandler : MonoBehaviour
 {
     [Header("Button")]
     public GameObject PlayButton;
+    public GameObject SpeakButton;
 
     [Header("Animation Settings")]
     public Animator animator;
@@ -48,6 +49,7 @@ public class AnimationHandler : MonoBehaviour
         {
             animator.SetTrigger("Idle");
             PlayButton.SetActive(true);
+            SpeakButton.SetActive(true);
         }
     }
     
@@ -70,13 +72,34 @@ public class AnimationHandler : MonoBehaviour
         if (animator == null) yield break;
         animator.SetTrigger("Talk");
         
+        if (facialSystem != null)
+        {
+            facialSystem.StopRandomExpression();
+            facialSystem.ResetAllBlendShapes(0.1f);
+        }
+        
         if (simpleLipSync != null && talkAudioClip != null)
         {
             simpleLipSync.StartLipSync(talkAudioClip);
         }
-        else if (facialSystem != null)
+    }
+
+    public void StartTalkingImmediate()
+    {
+        if (animator == null)  return;
+        PlayButton.SetActive(false);
+        SpeakButton.SetActive(false);
+        animator.SetTrigger("Talk");
+        
+        if (facialSystem != null)
         {
-            facialSystem.ResetAllBlendShapes(0.3f);
+            facialSystem.StopRandomExpression();
+            facialSystem.ResetAllBlendShapes(0.1f);
+        }
+        
+        if (simpleLipSync != null && talkAudioClip != null)
+        {
+            simpleLipSync.StartLipSync(talkAudioClip);
         }
     }
     public void PlayReactionSequence()
@@ -100,7 +123,15 @@ public class AnimationHandler : MonoBehaviour
         
         ResetAllAnimations();
         PlayButton.SetActive(false);
-        // Step 1: Sad
+        SpeakButton.SetActive(false);
+        
+        if (facialSystem != null)
+        {
+            facialSystem.StopRandomExpression();
+            facialSystem.ResetAllBlendShapes(0.3f);
+            yield return new WaitForSeconds(0.3f);
+        }
+        
         if (facialSystem != null && Sad != null)
         {
             facialSystem.SetExpression(Sad);
@@ -108,7 +139,6 @@ public class AnimationHandler : MonoBehaviour
         TriggerAnimation("Sad", true);
         yield return new WaitForSeconds(sadAnimationDuration);
         
-        // Step 2: Happy
         if (facialSystem != null && Happy != null)
         {
             facialSystem.ResetAllBlendShapes(ResetExpressionDuration);
@@ -118,7 +148,6 @@ public class AnimationHandler : MonoBehaviour
         TriggerAnimation("Happy", true);
         yield return new WaitForSeconds(happyAnimationDuration);
         
-        // Step 3: Sad again - Force reset first to ensure clean transition
         if (facialSystem != null && Sad != null)
         {
             facialSystem.ResetAllBlendShapes(ResetExpressionDuration);
@@ -135,6 +164,7 @@ public class AnimationHandler : MonoBehaviour
             yield return new WaitForSeconds(Sad.transitionDuration);
         }
         PlayButton.SetActive(true);
+        SpeakButton.SetActive(true);
         isPlayingSequence = false;
     }
     
@@ -174,5 +204,11 @@ public class AnimationHandler : MonoBehaviour
         }
         
         isPlayingSequence = false;
+    }
+
+    public void PlayRandomExpression(){
+        if (facialSystem == null) return;
+        
+        facialSystem.PlayRandomExpression();
     }
 }

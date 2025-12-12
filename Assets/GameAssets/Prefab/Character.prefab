@@ -6404,6 +6404,19 @@ MonoBehaviour:
   audioSource: {fileID: 610774201446705640}
   facialSystem: {fileID: 7119042515788919484}
   lipSyncData: {fileID: 11400000, guid: 76fc82981b3fe8d4e8f0998d06c56619, type: 2}
+  timedExpressions:
+  - expression: {fileID: 11400000, guid: 5e02d21506e39e240b0daee7e172eb36, type: 2}
+    triggerTime: 0
+    transitionSpeed: 0.1
+  - expression: {fileID: 11400000, guid: 3a461bf0a8a9a034da90bf83021fd77d, type: 2}
+    triggerTime: 0.25
+    transitionSpeed: 0.2
+  - expression: {fileID: 11400000, guid: 6976938dc4161f04eb0cb9cd52f6ff47, type: 2}
+    triggerTime: 1.63
+    transitionSpeed: 0.2
+  - expression: {fileID: 11400000, guid: 5e02d21506e39e240b0daee7e172eb36, type: 2}
+    triggerTime: 3
+    transitionSpeed: 0.2
   duration: 9.5
   silenceTransitionSpeed: 0.041
   useAudioDuration: 1

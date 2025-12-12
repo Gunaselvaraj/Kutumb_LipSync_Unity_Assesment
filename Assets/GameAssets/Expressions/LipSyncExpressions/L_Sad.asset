@@ -10,10 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ff93fa551c80a62419e77a8b07cb79af, type: 3}
-  m_Name: Suprise
+  m_Name: L_Sad
   m_EditorClassIdentifier: 
-  expressionName: Suprise
+  expressionName: L_sad
   blendShapes:
-  - blendShapeName: Surprise
-    weight: 70
-  transitionDuration: 0.077
+  - blendShapeName: Sad 2
+    weight: 50
+  transitionDuration: 0.1

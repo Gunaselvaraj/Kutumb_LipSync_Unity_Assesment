@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -9,19 +10,16 @@ using DG.Tweening;
 public class LoginManager : MonoBehaviour
 {
     [Header("UI References")]
+    [SerializeField] private TMP_InputField emailInputField;
+    [SerializeField] private TMP_InputField passwordInputField;
     [SerializeField] private Button loginButton;
     [SerializeField] private TextMeshProUGUI statusText;
     
     [Header("Scene Settings")]
     [SerializeField] private int nextSceneToload = 1;
     
-    [Header("Login Settings")]
-    [SerializeField] private bool allowLogin = true;
-    
     [Header("Animation Settings")]
-    [SerializeField] private float shakeDuration = 0.5f;
-    [SerializeField] private float shakeStrength = 30f;
-    [SerializeField] private int shakeVibrato = 10;
+    [SerializeField] private float Scaleduration = 0.5f;
     
     public event Action OnLoginSuccess;
     public event Action OnLoginFailed;
@@ -35,10 +33,31 @@ public class LoginManager : MonoBehaviour
             loginButton.onClick.AddListener(OnLoginButtonClicked);
         }
         
+        if (passwordInputField != null)
+        {
+            passwordInputField.contentType = TMP_InputField.ContentType.Password;
+        }
+        
         if (statusText != null)
         {
             statusText.text = "";
         }
+    }
+    
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+        
+        string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
+        if (!Regex.IsMatch(email, pattern))
+            return false;
+        
+        email = email.ToLower();
+        return email.EndsWith("@gmail.com") || 
+               email.EndsWith("@icloud.com") || 
+               email.EndsWith("@me.com") || 
+               email.EndsWith("@mac.com");
     }
     
     public void OnLoginButtonClicked()
@@ -54,7 +73,10 @@ public class LoginManager : MonoBehaviour
         
         yield return new WaitForSeconds(0.5f);
         
-        if (allowLogin)
+        string email = emailInputField != null ? emailInputField.text : "";
+        string password = passwordInputField != null ? passwordInputField.text : "";
+        
+        if (IsValidEmail(email) && !string.IsNullOrEmpty(password))
         {
             ShowLoginSuccess();
         }
@@ -89,16 +111,34 @@ public class LoginManager : MonoBehaviour
     {
         if (statusText != null)
         {
-            statusText.text = "Invalid Login";
+            string email = emailInputField != null ? emailInputField.text : "";
+            string password = passwordInputField != null ? passwordInputField.text : "";
+            
+            if (string.IsNullOrEmpty(email))
+            {
+                statusText.text = "Please enter an email";
+            }
+            else if (!IsValidEmail(email))
+            {
+                statusText.text = "Check EmailID and password ";
+            }
+            else if (string.IsNullOrEmpty(password))
+            {
+                statusText.text = "Please enter password";
+            }
+            else
+            {
+                statusText.text = "Password is wrong";
+            }
+            
             statusText.color = Color.red;
             
             statusText.transform.localScale = Vector3.one;
             statusText.alpha = 1f;
             
-            statusText.transform.DOShakePosition(shakeDuration, shakeStrength, shakeVibrato, 90f, false, true)
-                .SetEase(Ease.OutQuad);
+            statusText.transform.DOPunchScale(Vector3.one * 0.2f, Scaleduration, 5, 0.5f).SetEase(Ease.InOutSine);
             
-            statusText.transform.DOPunchScale(Vector3.one * 0.2f, shakeDuration, 5, 0.5f);
+            statusText.DOFade(0f, 0.5f).SetDelay(2f);
         }
         
         OnLoginFailed?.Invoke();

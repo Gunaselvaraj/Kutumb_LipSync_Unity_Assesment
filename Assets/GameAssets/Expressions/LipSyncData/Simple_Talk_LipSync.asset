@@ -17,32 +17,55 @@ MonoBehaviour:
     meshName: 
     isStatic: 0
     staticValue: 100
-    minValue: 59.8
+    minValue: 0
     maxValue: 100
-    changeInterval: 0.2
-    easeType: 1
-  - blendShapeName: jawOpen
-    meshName: Body
-    isStatic: 1
-    staticValue: 100
-    minValue: 50
-    maxValue: 100
-    changeInterval: 0.3
+    changeInterval: 0.14
     easeType: 4
+    useDelayedAnimation: 0
+    initialValue: 100
+    animationDelay: 0.5
   - blendShapeName: jawOpen
     meshName: Teeth
     isStatic: 0
     staticValue: 100
-    minValue: 48.6
+    minValue: 63.3
     maxValue: 100
     changeInterval: 0.1
-    easeType: 2
+    easeType: 1
+    useDelayedAnimation: 1
+    initialValue: 100
+    animationDelay: 0.6
   - blendShapeName: jawOpen
     meshName: Tongue
-    isStatic: 1
+    isStatic: 0
     staticValue: 100
-    minValue: 67
+    minValue: 72.6
     maxValue: 100
-    changeInterval: 0.14
+    changeInterval: 0.1
+    easeType: 4
+    useDelayedAnimation: 0
+    initialValue: 100
+    animationDelay: 0.5
+  - blendShapeName: jawOpen
+    meshName: Body
+    isStatic: 1
+    staticValue: 81.4
+    minValue: 50
+    maxValue: 100
+    changeInterval: 0.3
+    easeType: 4
+    useDelayedAnimation: 0
+    initialValue: 100
+    animationDelay: 0.5
+  - blendShapeName: mouthShrugLower
+    meshName: Body
+    isStatic: 0
+    staticValue: 100
+    minValue: 0
+    maxValue: 100
+    changeInterval: 0.1
     easeType: 1
+    useDelayedAnimation: 0
+    initialValue: 100
+    animationDelay: 0.5
   description: 

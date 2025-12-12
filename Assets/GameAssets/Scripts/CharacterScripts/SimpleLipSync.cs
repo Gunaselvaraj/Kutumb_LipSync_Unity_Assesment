@@ -2,6 +2,15 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using DG.Tweening;
+
+[System.Serializable]
+public class TimedExpression
+{
+    public FacialExpressionData expression;
+    public float triggerTime;
+    public float transitionSpeed = 0.3f;
+}
+
 [RequireComponent(typeof(AudioSource))]
 public class SimpleLipSync : MonoBehaviour
 {
@@ -14,8 +23,10 @@ public class SimpleLipSync : MonoBehaviour
     [Header("Lip Sync Configuration")]
     public LipSyncData lipSyncData;
     
+    [Header("Timed Expressions")]
+    public List<TimedExpression> timedExpressions = new List<TimedExpression>();
+    
     [Header("Lip Sync Settings")]
-    [Tooltip("Duration to play lip-sync animation (in seconds)")]
     public float duration = 5f;
     [Range(0f, 1f)]
     public float silenceTransitionSpeed = 0.3f;
@@ -27,7 +38,9 @@ public class SimpleLipSync : MonoBehaviour
     public bool showDebugInfo = false;
     
     private Coroutine lipSyncCoroutine;
+    private Coroutine expressionCoroutine;
     private bool isPlaying = false;
+    private HashSet<int> triggeredExpressions = new HashSet<int>();
     
     void Awake()
     {
@@ -97,6 +110,14 @@ public class SimpleLipSync : MonoBehaviour
             StopCoroutine(lipSyncCoroutine);
             lipSyncCoroutine = null;
         }
+        
+        if (expressionCoroutine != null)
+        {
+            StopCoroutine(expressionCoroutine);
+            expressionCoroutine = null;
+        }
+        
+        triggeredExpressions.Clear();
         
         if (audioSource != null && audioSource.isPlaying)
         {
@@ -191,6 +212,12 @@ public class SimpleLipSync : MonoBehaviour
     private IEnumerator LipSyncCoroutine()
     {
         lipSyncData.Initialize();
+        triggeredExpressions.Clear();
+        
+        if (timedExpressions.Count > 0 && facialSystem != null)
+        {
+            expressionCoroutine = StartCoroutine(TimedExpressionsCoroutine());
+        }
         
         float elapsed = 0f;
         
@@ -202,12 +229,95 @@ public class SimpleLipSync : MonoBehaviour
         }
         
         isPlaying = false;
+        
+        if (expressionCoroutine != null)
+        {
+            StopCoroutine(expressionCoroutine);
+            expressionCoroutine = null;
+        }
+        
+        ResetAllTriggeredExpressions();
+        
         StartCoroutine(ReturnToSilenceCoroutine());
         
         AnimationHandler anim = GetComponent<AnimationHandler>();
         if(anim != null)
         {
             anim.PlayIdle();
+        }
+    }
+    
+    private void ResetAllTriggeredExpressions()
+    {
+        if (facialSystem == null || timedExpressions.Count == 0) return;
+        
+        foreach (int index in triggeredExpressions)
+        {
+            if (index < timedExpressions.Count && timedExpressions[index].expression != null)
+            {
+                var expression = timedExpressions[index].expression;
+                foreach (var bs in expression.blendShapes)
+                {
+                    facialSystem.SetBlendShapeValue(bs.blendShapeName, 0f);
+                }
+            }
+        }
+        
+        triggeredExpressions.Clear();
+    }
+    
+    private IEnumerator TimedExpressionsCoroutine()
+    {
+        var sortedExpressions = new List<TimedExpression>(timedExpressions);
+        sortedExpressions.Sort((a, b) => a.triggerTime.CompareTo(b.triggerTime));
+        
+        float elapsed = 0f;
+        int currentIndex = 0;
+        
+        while (currentIndex < sortedExpressions.Count && elapsed < duration)
+        {
+            var timedExpr = sortedExpressions[currentIndex];
+            
+            if (elapsed >= timedExpr.triggerTime && !triggeredExpressions.Contains(currentIndex))
+            {
+                if (timedExpr.expression != null)
+                {
+                    ResetPreviousExpressionBlendShapes(timedExpr);
+                    
+                    yield return new WaitForSeconds(timedExpr.transitionSpeed * 0.5f);
+                    
+                    facialSystem.SetExpression(timedExpr.expression, timedExpr.transitionSpeed);
+                    triggeredExpressions.Add(currentIndex);
+                }
+                currentIndex++;
+            }
+            
+            elapsed += Time.deltaTime;
+            yield return null;
+        }
+    }
+    
+    private void ResetPreviousExpressionBlendShapes(TimedExpression currentExpression)
+    {
+        if (facialSystem == null || currentExpression.expression == null) return;
+        
+        var currentBlendShapes = new HashSet<string>();
+        foreach (var bs in currentExpression.expression.blendShapes)
+        {
+            currentBlendShapes.Add(bs.blendShapeName);
+        }
+        
+        foreach (var timedExpr in timedExpressions)
+        {
+            if (timedExpr.expression == null || timedExpr == currentExpression) continue;
+            
+            foreach (var bs in timedExpr.expression.blendShapes)
+            {
+                if (!currentBlendShapes.Contains(bs.blendShapeName))
+                {
+                    facialSystem.SetBlendShapeValue(bs.blendShapeName, 0f);
+                }
+            }
         }
     }
     
@@ -262,6 +372,12 @@ public class SimpleLipSync : MonoBehaviour
             lipSyncCoroutine = null;
         }
         
+        if (expressionCoroutine != null)
+        {
+            StopCoroutine(expressionCoroutine);
+            expressionCoroutine = null;
+        }
+        
         if (audioSource != null && audioSource.isPlaying)
         {
             audioSource.Stop();
@@ -273,5 +389,6 @@ public class SimpleLipSync : MonoBehaviour
         }
         
         isPlaying = false;
+        triggeredExpressions.Clear();
     }
 }
