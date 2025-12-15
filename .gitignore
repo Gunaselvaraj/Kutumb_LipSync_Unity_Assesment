@@ -65,3 +65,7 @@ sysinfo.txt
 # Crashlytics generated file
 crashlytics-build.properties
 FindMyCar_Test-3_BackUpThisFolder_ButDontShipItWithYourGame/Managed/icallsummary.txt
+
+# Exclude large Firebase files
+Assets/Firebase/Plugins/x86_64/FirebaseCppApp-13_6_0.bundle
+Assets/Firebase/Plugins/x86_64/FirebaseCppApp-13_6_0.so

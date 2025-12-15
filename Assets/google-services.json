@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "758404875030",
+    "project_id": "lipsync-assignment",
+    "storage_bucket": "lipsync-assignment.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758404875030:android:57f7bd1f523f90decb0637",
+        "android_client_info": {
+          "package_name": "com.DefaultCompany.Lipsync_Assignment"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "758404875030-fu63aju4auebef4haoo8ta7hu2ble39i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCpYIg4JnlB145uR1rgD8M5Y0kOzV45_Lc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "758404875030-fu63aju4auebef4haoo8ta7hu2ble39i.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

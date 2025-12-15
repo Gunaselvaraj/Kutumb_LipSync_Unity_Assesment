@@ -15,5 +15,5 @@ MonoBehaviour:
   expressionName: L_sad
   blendShapes:
   - blendShapeName: Sad 2
-    weight: 50
+    weight: 80
   transitionDuration: 0.1

@@ -1441,6 +1441,88 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[4].expression
+      value: 
+      objectReference: {fileID: 11400000, guid: 6976938dc4161f04eb0cb9cd52f6ff47,
+        type: 2}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[5].expression
+      value: 
+      objectReference: {fileID: 11400000, guid: 5e02d21506e39e240b0daee7e172eb36,
+        type: 2}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[4].triggerTime
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[5].triggerTime
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[0].transitionSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[1].transitionSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[2].transitionSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[3].transitionSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[4].transitionSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[5].transitionSpeed
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[0].lipSyncAnimationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[1].lipSyncAnimationMode
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[2].lipSyncAnimationMode
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[3].lipSyncAnimationMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 491033311430173983, guid: f00ed77e879fcaa46a7f991c733dfc4b,
+        type: 3}
+      propertyPath: timedExpressions.Array.data[4].lipSyncAnimationMode
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: 5404463371468246286, guid: f00ed77e879fcaa46a7f991c733dfc4b,
         type: 3}
       propertyPath: m_Name
