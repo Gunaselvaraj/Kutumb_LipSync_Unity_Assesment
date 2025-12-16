@@ -68,4 +68,5 @@ FindMyCar_Test-3_BackUpThisFolder_ButDontShipItWithYourGame/Managed/icallsummary
 
 # Exclude large Firebase files
 Assets/Firebase/Plugins/x86_64/FirebaseCppApp-13_6_0.bundle
+Assets/Firebase/Plugins/x86_64/FirebaseCppApp-11_6_0.bundle
 Assets/Firebase/Plugins/x86_64/FirebaseCppApp-13_6_0.so
